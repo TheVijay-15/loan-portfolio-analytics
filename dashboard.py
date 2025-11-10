@@ -73,37 +73,95 @@ app_mode = st.radio(
 st.markdown("</div>", unsafe_allow_html=True)
 
 def create_sample_data():
-    """Create sample data for demo purposes"""
+    """Create realistic sample data for demo purposes"""
     conn = sqlite3.connect('loan_analysis.db')
     
-    # Create comprehensive sample data
     import numpy as np
     np.random.seed(42)
     
-    n_records = 2000
-    grades = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
-    purposes = ['debt_consolidation', 'credit_card', 'home_improvement', 'medical', 'car', 'small_business']
-    emp_lengths = ['< 1 year', '1 year', '2 years', '3 years', '4 years', '5 years', '6 years', '7 years', '8 years', '9 years', '10+ years']
+    n_records = 5000  # More records for better visuals
     
+    # Realistic grade distribution with proper risk-return profile
+    grades = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+    grade_probs = [0.25, 0.30, 0.20, 0.12, 0.08, 0.03, 0.02]
+    
+    # Realistic loan purposes with different profitability
+    purposes = ['debt_consolidation', 'credit_card', 'home_improvement', 'medical', 'car', 'small_business', 'major_purchase', 'vacation']
+    purpose_profits = {
+        'debt_consolidation': 1.15,  # 15% profit
+        'credit_card': 1.12,         # 12% profit  
+        'home_improvement': 1.08,    # 8% profit
+        'car': 1.05,                 # 5% profit
+        'major_purchase': 1.03,      # 3% profit
+        'medical': 0.95,             # 5% loss
+        'small_business': 0.90,      # 10% loss
+        'vacation': 0.85             # 15% loss
+    }
+    
+    # Realistic employment lengths with default probabilities
+    emp_lengths = ['< 1 year', '1 year', '2 years', '3 years', '4 years', '5 years', '6 years', '7 years', '8 years', '9 years', '10+ years']
+    emp_default_rates = [0.25, 0.20, 0.15, 0.12, 0.10, 0.08, 0.07, 0.06, 0.05, 0.04, 0.03]
+    
+    # Generate realistic data
     sample_data = pd.DataFrame({
-        'loan_amnt': np.random.randint(5000, 35000, n_records),
-        'int_rate': np.random.uniform(5, 25, n_records),
-        'grade': np.random.choice(grades, n_records, p=[0.2, 0.25, 0.2, 0.15, 0.1, 0.05, 0.05]),
+        'loan_amnt': np.random.randint(5000, 40000, n_records),
+        'grade': np.random.choice(grades, n_records, p=grade_probs),
         'emp_length': np.random.choice(emp_lengths, n_records),
-        'annual_inc': np.random.randint(30000, 120000, n_records),
-        'loan_status': np.random.choice(['Current', 'Fully Paid', 'Charged Off'], n_records, p=[0.7, 0.2, 0.1]),
         'purpose': np.random.choice(purposes, n_records),
-        'total_pymnt': np.random.uniform(5000, 40000, n_records)
     })
     
-    # Adjust total_pymnt based on loan status
-    sample_data.loc[sample_data['loan_status'] == 'Charged Off', 'total_pymnt'] = sample_data['loan_amnt'] * 0.3
-    sample_data.loc[sample_data['loan_status'] == 'Fully Paid', 'total_pymnt'] = sample_data['loan_amnt'] * 1.2
-    sample_data.loc[sample_data['loan_status'] == 'Current', 'total_pymnt'] = sample_data['loan_amnt'] * 0.6
+    # Assign realistic interest rates based on grade (higher risk = higher return)
+    grade_rates = {'A': (5, 8), 'B': (8, 12), 'C': (12, 15), 'D': (15, 18), 'E': (18, 22), 'F': (22, 25), 'G': (25, 30)}
+    sample_data['int_rate'] = sample_data['grade'].apply(
+        lambda x: np.random.uniform(grade_rates[x][0], grade_rates[x][1])
+    )
     
+    # Assign realistic annual income
+    sample_data['annual_inc'] = np.random.randint(30000, 150000, n_records)
+    
+    # Realistic loan status based on grade and employment
+    def get_loan_status(grade, emp_length):
+        base_default = {'A': 0.02, 'B': 0.05, 'C': 0.08, 'D': 0.12, 'E': 0.18, 'F': 0.25, 'G': 0.35}
+        emp_risk = emp_default_rates[emp_lengths.index(emp_length)]
+        total_risk = base_default[grade] + emp_risk * 0.3
+        
+        if np.random.random() < total_risk:
+            return 'Charged Off'
+        elif np.random.random() < 0.7:  # 70% of non-defaults are current
+            return 'Current'
+        else:
+            return 'Fully Paid'
+    
+    sample_data['loan_status'] = sample_data.apply(
+        lambda row: get_loan_status(row['grade'], row['emp_length']), axis=1
+    )
+    
+    # Realistic total payments based on purpose profitability and loan status
+    def calculate_total_payment(loan_amnt, purpose, loan_status):
+        if loan_status == 'Charged Off':
+            return loan_amnt * np.random.uniform(0.1, 0.4)  # Recover 10-40%
+        elif loan_status == 'Fully Paid':
+            return loan_amnt * purpose_profits[purpose] * np.random.uniform(0.95, 1.05)
+        else:  # Current
+            return loan_amnt * np.random.uniform(0.3, 0.8)  # Partial payments
+    
+    sample_data['total_pymnt'] = sample_data.apply(
+        lambda row: calculate_total_payment(row['loan_amnt'], row['purpose'], row['loan_status']), axis=1
+    )
+    
+    # Add DTI ratio (realistic range)
+    sample_data['dti'] = np.random.uniform(5, 35, n_records)
+    
+    # Add recovery fields for charged off loans
+    sample_data['recoveries'] = sample_data.apply(
+        lambda row: row['total_pymnt'] * 0.1 if row['loan_status'] == 'Charged Off' else 0, axis=1
+    )
+    sample_data['collection_recovery_fee'] = sample_data['recoveries'] * 0.1
+    
+    # Save to database
     sample_data.to_sql('lending_club_loans', conn, if_exists='replace', index=False)
     conn.close()
-    st.success("Sample data created successfully!")
+    st.success("Realistic sample data created successfully!")
 
 # Load data
 @st.cache_data
