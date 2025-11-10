@@ -3,7 +3,7 @@ import pandas as pd
 import sqlite3
 import plotly.express as px
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
+import os
 import analysis
 from datetime import datetime
 
@@ -41,7 +41,6 @@ st.markdown("""
         padding-bottom: 0.5rem;
         border-bottom: 3px solid #667eea;
     }
-    /* Enhanced Top Navigation */
     .top-nav-container {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         padding: 0.5rem;
@@ -53,17 +52,17 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Title with gradient
-st.markdown('<h1 class="main-header"> Fintech Loan Analytics Dashboard</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-header">Fintech Loan Analytics Dashboard</h1>', unsafe_allow_html=True)
 
-# Enhanced Top Navigation Bar
+# Top Navigation Bar
 st.markdown("""
 <div class="top-nav-container">
     <div style="text-align: center; margin-bottom: 1rem;">
-        <h3 style="color: white; margin: 0; font-size: 1.4rem;"> Analytics Hub - Choose Your Analysis View</h3>
+        <h3 style="color: white; margin: 0; font-size: 1.4rem;">Analytics Hub - Choose Your Analysis View</h3>
     </div>
 """, unsafe_allow_html=True)
 
-# Simple navigation without session state
+# Simple navigation
 app_mode = st.radio(
     "Select Dashboard View:",
     ["Executive Overview", "Risk Intelligence", "Performance Analytics", "Portfolio Explorer"],
@@ -73,9 +72,47 @@ app_mode = st.radio(
 
 st.markdown("</div>", unsafe_allow_html=True)
 
+def create_sample_data():
+    """Create sample data for demo purposes"""
+    conn = sqlite3.connect('loan_analysis.db')
+    
+    # Create comprehensive sample data
+    import numpy as np
+    np.random.seed(42)
+    
+    n_records = 2000
+    grades = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+    purposes = ['debt_consolidation', 'credit_card', 'home_improvement', 'medical', 'car', 'small_business']
+    emp_lengths = ['< 1 year', '1 year', '2 years', '3 years', '4 years', '5 years', '6 years', '7 years', '8 years', '9 years', '10+ years']
+    
+    sample_data = pd.DataFrame({
+        'loan_amnt': np.random.randint(5000, 35000, n_records),
+        'int_rate': np.random.uniform(5, 25, n_records),
+        'grade': np.random.choice(grades, n_records, p=[0.2, 0.25, 0.2, 0.15, 0.1, 0.05, 0.05]),
+        'emp_length': np.random.choice(emp_lengths, n_records),
+        'annual_inc': np.random.randint(30000, 120000, n_records),
+        'loan_status': np.random.choice(['Current', 'Fully Paid', 'Charged Off'], n_records, p=[0.7, 0.2, 0.1]),
+        'purpose': np.random.choice(purposes, n_records),
+        'total_pymnt': np.random.uniform(5000, 40000, n_records)
+    })
+    
+    # Adjust total_pymnt based on loan status
+    sample_data.loc[sample_data['loan_status'] == 'Charged Off', 'total_pymnt'] = sample_data['loan_amnt'] * 0.3
+    sample_data.loc[sample_data['loan_status'] == 'Fully Paid', 'total_pymnt'] = sample_data['loan_amnt'] * 1.2
+    sample_data.loc[sample_data['loan_status'] == 'Current', 'total_pymnt'] = sample_data['loan_amnt'] * 0.6
+    
+    sample_data.to_sql('lending_club_loans', conn, if_exists='replace', index=False)
+    conn.close()
+    st.success("Sample data created successfully!")
+
 # Load data
 @st.cache_data
 def load_data():
+    # Create sample data if database doesn't exist
+    if not os.path.exists('loan_analysis.db'):
+        st.info("Creating sample data for demonstration...")
+        create_sample_data()
+    
     portfolio = analysis.get_portfolio_summary()
     risk_grade = analysis.get_risk_by_grade()
     profit_purpose = analysis.get_profitability_by_purpose()
@@ -95,7 +132,7 @@ def load_data():
         ORDER BY default_rate DESC
     """, conn)
     
-    # Create synthetic monthly data for trends (since real data might not have dates)
+    # Create synthetic monthly data for trends
     monthly_trends = pd.DataFrame({
         'month': pd.date_range('2023-01-01', periods=6, freq='M').strftime('%b %Y'),
         'loans': [120, 150, 180, 160, 190, 210],
@@ -128,7 +165,7 @@ if app_mode == "Executive Overview":
     with col1:
         st.markdown(f"""
         <div class="metric-card">
-            <h3 style="color: #2c3e50; margin: 0;"> Portfolio Value</h3>
+            <h3 style="color: #2c3e50; margin: 0;">Portfolio Value</h3>
             <h2 style="color: #27ae60; margin: 0.5rem 0;">${metrics_data['total_portfolio_value']:,.0f}</h2>
             <p style="color: #7f8c8d; margin: 0;">{metrics_data['total_loans']:,} Loans</p>
         </div>
@@ -138,7 +175,7 @@ if app_mode == "Executive Overview":
         risk_color = "#e74c3c" if metrics_data['default_rate_percent'] > 15 else "#f39c12" if metrics_data['default_rate_percent'] > 8 else "#27ae60"
         st.markdown(f"""
         <div class="metric-card">
-            <h3 style="color: #2c3e50; margin: 0;"> Default Rate</h3>
+            <h3 style="color: #2c3e50; margin: 0;">Default Rate</h3>
             <h2 style="color: {risk_color}; margin: 0.5rem 0;">{metrics_data['default_rate_percent']:.1f}%</h2>
             <p style="color: #7f8c8d; margin: 0;">{metrics_data['total_defaults']} Defaults</p>
         </div>
@@ -147,7 +184,7 @@ if app_mode == "Executive Overview":
     with col3:
         st.markdown(f"""
         <div class="metric-card">
-            <h3 style="color: #2c3e50; margin: 0;"> Avg Interest</h3>
+            <h3 style="color: #2c3e50; margin: 0;">Avg Interest</h3>
             <h2 style="color: #3498db; margin: 0.5rem 0;">{metrics_data['avg_interest_rate']:.1f}%</h2>
             <p style="color: #7f8c8d; margin: 0;">Market Rate</p>
         </div>
@@ -157,7 +194,7 @@ if app_mode == "Executive Overview":
         profit_color = "#27ae60" if metrics_data['net_profit'] > 0 else "#e74c3c"
         st.markdown(f"""
         <div class="metric-card">
-            <h3 style="color: #2c3e50; margin: 0;"> Net Profit</h3>
+            <h3 style="color: #2c3e50; margin: 0;">Net Profit</h3>
             <h2 style="color: {profit_color}; margin: 0.5rem 0;">${metrics_data['net_profit']:,.0f}</h2>
             <p style="color: #7f8c8d; margin: 0;">Portfolio Performance</p>
         </div>
@@ -167,7 +204,7 @@ if app_mode == "Executive Overview":
     col1, col2 = st.columns(2)
     
     with col1:
-        # Enhanced Risk-Reward Radar Chart with colored background
+        # Enhanced Risk-Reward Radar Chart
         fig = go.Figure()
         
         categories = risk_grade['grade'].tolist()
@@ -186,8 +223,8 @@ if app_mode == "Executive Overview":
             theta=categories,
             fill='toself',
             name='Default Rate (%)',
-           line=dict(color='#2c3e50', width=3),  # Navy
-           fillcolor='rgba(44, 62, 80, 0.4)'
+            line=dict(color='#2c3e50', width=3),
+            fillcolor='rgba(44, 62, 80, 0.4)'
         ))
         
         fig.update_layout(
@@ -213,7 +250,7 @@ if app_mode == "Executive Overview":
         st.plotly_chart(fig, use_container_width=True)
     
     with col2:
-        # Portfolio Composition with better colors
+        # Portfolio Composition
         purpose_summary = profit_purpose.nlargest(8, 'total_loans')
         fig = px.sunburst(
             purpose_summary, 
@@ -228,10 +265,10 @@ if app_mode == "Executive Overview":
         fig.update_layout(paper_bgcolor='rgba(0,0,0,0)')
         st.plotly_chart(fig, use_container_width=True)
 
-    # Monthly Performance Trends - FIXED with proper background
-    st.markdown('<h3 class="section-header"> Monthly Performance Trends & Market Insights</h3>', unsafe_allow_html=True)
+    # Monthly Performance Trends
+    st.markdown('<h3 class="section-header">Monthly Performance Trends & Market Insights</h3>', unsafe_allow_html=True)
     
-    # Create a proper line chart for trends with enhanced styling
+    # Create a proper line chart for trends
     fig = go.Figure()
     
     # Add loan count line
@@ -281,7 +318,7 @@ if app_mode == "Executive Overview":
         height=450,
         showlegend=True,
         paper_bgcolor='rgba(0,0,0,0)',
-       plot_bgcolor='rgba(30, 40, 60, 0.9)',
+        plot_bgcolor='rgba(30, 40, 60, 0.9)',
         legend=dict(
             orientation="h",
             yanchor="bottom",
@@ -295,12 +332,12 @@ if app_mode == "Executive Overview":
 
 # RISK INTELLIGENCE DASHBOARD
 elif app_mode == "Risk Intelligence":
-    st.markdown('<h2 class="section-header"> Risk Intelligence Center</h2>', unsafe_allow_html=True)
+    st.markdown('<h2 class="section-header">Risk Intelligence Center</h2>', unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
     
     with col1:
-        # Improved Risk Heatmap - Bar chart instead
+        # Default Rate by Credit Grade
         fig = px.bar(
             risk_grade,
             x='grade',
@@ -315,7 +352,7 @@ elif app_mode == "Risk Intelligence":
         fig.update_layout(xaxis_title='Credit Grade', yaxis_title='Default Rate (%)')
         st.plotly_chart(fig, use_container_width=True)
         
-        # Employment Risk Analysis - Changed to scatter plot with interest rate
+        # Employment Risk Analysis
         fig = px.scatter(
             emp_risk.nlargest(10, 'default_rate'),
             x='emp_length',
@@ -323,7 +360,7 @@ elif app_mode == "Risk Intelligence":
             size='loan_count',
             color='avg_interest',
             color_continuous_scale='RdYlGn_r',
-            title=' Default Rate by Employment Length',
+            title='Default Rate by Employment Length',
             height=400,
             size_max=30
         )
@@ -331,7 +368,7 @@ elif app_mode == "Risk Intelligence":
         st.plotly_chart(fig, use_container_width=True)
     
     with col2:
-        # Risk Distribution Box Plot (simpler than violin) - Added legend
+        # Interest Rate Distribution
         fig = px.box(
             loan_data, 
             x='grade', 
@@ -343,7 +380,7 @@ elif app_mode == "Risk Intelligence":
         fig.update_layout(showlegend=True, xaxis_title='Credit Grade', yaxis_title='Interest Rate (%)')
         st.plotly_chart(fig, use_container_width=True)
         
-        # Risk-Return Scatter Chart (2D - easier to understand)
+        # Risk-Return Scatter Chart
         fig = px.scatter(
             risk_grade,
             x='default_rate_percent',
@@ -367,7 +404,7 @@ elif app_mode == "Performance Analytics":
     col1, col2 = st.columns(2)
     
     with col1:
-        # ROI Performance - Horizontal Bar Chart
+        # ROI Performance
         top_purposes = profit_purpose.nlargest(10, 'roi_percent')
         fig = px.bar(
             top_purposes,
@@ -384,7 +421,7 @@ elif app_mode == "Performance Analytics":
         st.plotly_chart(fig, use_container_width=True)
     
     with col2:
-        # Profitability by Purpose - Simple Bar Chart
+        # Profitability by Purpose
         profit_purpose_sorted = profit_purpose.nlargest(8, 'net_profit')
         fig = px.bar(
             profit_purpose_sorted,
@@ -416,9 +453,9 @@ elif app_mode == "Performance Analytics":
         height=400
     )
 
-# PORTFOLIO EXPLORER DASHBOARD - SIMPLIFIED
+# PORTFOLIO EXPLORER DASHBOARD
 else:
-    st.markdown('<h2 class="section-header"> Portfolio Explorer</h2>', unsafe_allow_html=True)
+    st.markdown('<h2 class="section-header">Portfolio Explorer</h2>', unsafe_allow_html=True)
     
     # Interactive Filters
     col1, col2 = st.columns(2)
@@ -444,7 +481,7 @@ else:
     col1, col2 = st.columns(2)
     
     with col1:
-        # Filtered Risk Analysis - Simple Bar Chart
+        # Filtered Risk Analysis
         if not filtered_risk.empty:
             fig = px.bar(
                 filtered_risk,
@@ -463,7 +500,6 @@ else:
     with col2:
         # Selected Purpose Profitability in 3D Plot
         if not filtered_profit.empty:
-            # Create 3D scatter plot for profitability analysis
             fig = px.scatter_3d(
                 filtered_profit,
                 x='total_loans',
@@ -488,7 +524,7 @@ else:
             st.info("No data available for selected purposes")
     
     # Real-time Portfolio Summary
-    st.markdown('<h3 class="section-header"> Filtered Portfolio Summary</h3>', unsafe_allow_html=True)
+    st.markdown('<h3 class="section-header">Filtered Portfolio Summary</h3>', unsafe_allow_html=True)
     
     if not filtered_risk.empty and not filtered_profit.empty:
         col1, col2, col3, col4 = st.columns(4)
@@ -518,9 +554,9 @@ else:
         
         col1, col2 = st.columns(2)
         with col1:
-            st.success(f"*Best Grade*: {best_grade['grade']} ({best_grade['default_rate_percent']:.1f}% defaults)")
+            st.success(f"Best Grade: {best_grade['grade']} ({best_grade['default_rate_percent']:.1f}% defaults)")
         with col2:
-            st.success(f"*Best Purpose*: {best_purpose['purpose']} ({best_purpose['roi_percent']:.1f}% ROI)")
+            st.success(f"Best Purpose: {best_purpose['purpose']} ({best_purpose['roi_percent']:.1f}% ROI)")
     else:
         st.warning("Please select at least one grade and one purpose to see filtered results")
 
@@ -534,7 +570,7 @@ if app_mode == "Executive Overview":
     
     with insight_col1:
         st.success("""
-        *Growth Strategy*
+        Growth Strategy
         - Portfolio Value: ${:,.0f}
         - Focus on Grade A-B segments
         - Expand profitable purposes
@@ -542,7 +578,7 @@ if app_mode == "Executive Overview":
     
     with insight_col2:
         st.warning("""
-        *Risk Management*
+        Risk Management
         - Current default rate: {:.1f}%
         - Monitor high-risk grades
         - Review underwriting
@@ -550,7 +586,7 @@ if app_mode == "Executive Overview":
     
     with insight_col3:
         st.info("""
-        *Optimization*
+        Optimization
         - Net Profit: ${:,.0f}
         - Improve ROI on low performers
         - Diversify portfolio
@@ -564,7 +600,7 @@ elif app_mode == "Risk Intelligence":
     
     with insight_col1:
         st.error("""
-        *Critical Risk*
+        Critical Risk
         - {} Grade: {:.1f}% defaults
         - Immediate action required
         - Consider suspending lending
@@ -572,7 +608,7 @@ elif app_mode == "Risk Intelligence":
     
     with insight_col2:
         st.success("""
-        *Safe Segment*
+        Safe Segment
         - {} Grade: {:.1f}% defaults
         - Expand this segment
         - Lower interest rates possible
@@ -580,7 +616,7 @@ elif app_mode == "Risk Intelligence":
     
     with insight_col3:
         st.warning("""
-        *Risk Monitoring*
+        Risk Monitoring
         - Watch employment segments
         - Track interest rate spreads
         - Implement early warnings
@@ -594,7 +630,7 @@ elif app_mode == "Performance Analytics":
     
     with insight_col1:
         st.success("""
-        *Top Performer*
+        Top Performer
         - {}: ${:,.0f} profit
         - {:.1f}% ROI
         - Expand this segment
@@ -603,14 +639,14 @@ elif app_mode == "Performance Analytics":
     with insight_col2:
         if worst_performer['net_profit'] < 0:
             st.error("""
-            *Loss Maker*
+            Loss Maker
             - {}: ${:,.0f} loss
             - Review strategy
             - Consider exiting
             """.format(worst_performer['purpose'], abs(worst_performer['net_profit'])))
         else:
             st.warning("""
-            *Low Performer*
+            Low Performer
             - {}: ${:,.0f} profit
             - Optimize pricing
             - Improve efficiency
@@ -618,7 +654,7 @@ elif app_mode == "Performance Analytics":
     
     with insight_col3:
         st.info("""
-        *Profit Tips*
+        Profit Tips
         - Focus on high-ROI purposes
         - Optimize loan sizes
         - Balance risk & return
@@ -629,7 +665,7 @@ else:  # Portfolio Explorer
     
     with insight_col1:
         st.info("""
-        *Exploration Mode*
+        Exploration Mode
         - Use filters to analyze segments
         - Compare different strategies
         - Find hidden opportunities
@@ -637,7 +673,7 @@ else:  # Portfolio Explorer
     
     with insight_col2:
         st.success("""
-        *Custom Analysis*
+        Custom Analysis
         - Real-time filtering
         - Multi-dimensional views
         - Data-driven decisions
@@ -645,7 +681,7 @@ else:  # Portfolio Explorer
     
     with insight_col3:
         st.warning("""
-        *Action Steps*
+        Action Steps
         - Apply insights to strategy
         - Test different scenarios
         - Monitor results
