@@ -9,7 +9,7 @@ from datetime import datetime
 
 # Page configuration
 st.set_page_config(
-    page_title="🏦 Loan Portfolio Analytics",
+    page_title="Loan Portfolio Analytics",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -53,20 +53,20 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Title with gradient
-st.markdown('<h1 class="main-header">🏦 Fintech Loan Analytics Dashboard</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-header"> Fintech Loan Analytics Dashboard</h1>', unsafe_allow_html=True)
 
 # Enhanced Top Navigation Bar
 st.markdown("""
 <div class="top-nav-container">
     <div style="text-align: center; margin-bottom: 1rem;">
-        <h3 style="color: white; margin: 0; font-size: 1.4rem;">🎯 Analytics Hub - Choose Your Analysis View</h3>
+        <h3 style="color: white; margin: 0; font-size: 1.4rem;"> Analytics Hub - Choose Your Analysis View</h3>
     </div>
 """, unsafe_allow_html=True)
 
 # Simple navigation without session state
 app_mode = st.radio(
     "Select Dashboard View:",
-    ["📊 Executive Overview", "🎯 Risk Intelligence", "💰 Performance Analytics", "🔍 Portfolio Explorer"],
+    ["Executive Overview", "Risk Intelligence", "Performance Analytics", "Portfolio Explorer"],
     horizontal=True,
     label_visibility="collapsed"
 )
@@ -117,8 +117,8 @@ def load_data():
 portfolio, risk_grade, profit_purpose, emp_risk, monthly_trends, loan_data = load_data()
 
 # EXECUTIVE OVERVIEW DASHBOARD
-if app_mode == "📊 Executive Overview":
-    st.markdown('<h2 class="section-header">🚀 Executive Dashboard & Performance Overview</h2>', unsafe_allow_html=True)
+if app_mode == "Executive Overview":
+    st.markdown('<h2 class="section-header">Executive Dashboard & Performance Overview</h2>', unsafe_allow_html=True)
     
     # Key Metrics with improved styling
     col1, col2, col3, col4 = st.columns(4)
@@ -128,7 +128,7 @@ if app_mode == "📊 Executive Overview":
     with col1:
         st.markdown(f"""
         <div class="metric-card">
-            <h3 style="color: #2c3e50; margin: 0;">💰 Portfolio Value</h3>
+            <h3 style="color: #2c3e50; margin: 0;"> Portfolio Value</h3>
             <h2 style="color: #27ae60; margin: 0.5rem 0;">${metrics_data['total_portfolio_value']:,.0f}</h2>
             <p style="color: #7f8c8d; margin: 0;">{metrics_data['total_loans']:,} Loans</p>
         </div>
@@ -138,7 +138,7 @@ if app_mode == "📊 Executive Overview":
         risk_color = "#e74c3c" if metrics_data['default_rate_percent'] > 15 else "#f39c12" if metrics_data['default_rate_percent'] > 8 else "#27ae60"
         st.markdown(f"""
         <div class="metric-card">
-            <h3 style="color: #2c3e50; margin: 0;">📉 Default Rate</h3>
+            <h3 style="color: #2c3e50; margin: 0;"> Default Rate</h3>
             <h2 style="color: {risk_color}; margin: 0.5rem 0;">{metrics_data['default_rate_percent']:.1f}%</h2>
             <p style="color: #7f8c8d; margin: 0;">{metrics_data['total_defaults']} Defaults</p>
         </div>
@@ -147,7 +147,7 @@ if app_mode == "📊 Executive Overview":
     with col3:
         st.markdown(f"""
         <div class="metric-card">
-            <h3 style="color: #2c3e50; margin: 0;">📊 Avg Interest</h3>
+            <h3 style="color: #2c3e50; margin: 0;"> Avg Interest</h3>
             <h2 style="color: #3498db; margin: 0.5rem 0;">{metrics_data['avg_interest_rate']:.1f}%</h2>
             <p style="color: #7f8c8d; margin: 0;">Market Rate</p>
         </div>
@@ -157,7 +157,7 @@ if app_mode == "📊 Executive Overview":
         profit_color = "#27ae60" if metrics_data['net_profit'] > 0 else "#e74c3c"
         st.markdown(f"""
         <div class="metric-card">
-            <h3 style="color: #2c3e50; margin: 0;">🎯 Net Profit</h3>
+            <h3 style="color: #2c3e50; margin: 0;"> Net Profit</h3>
             <h2 style="color: {profit_color}; margin: 0.5rem 0;">${metrics_data['net_profit']:,.0f}</h2>
             <p style="color: #7f8c8d; margin: 0;">Portfolio Performance</p>
         </div>
@@ -205,7 +205,7 @@ if app_mode == "📊 Executive Overview":
                 bgcolor='rgba(245, 247, 250, 0.5)'
             ),
             showlegend=True,
-            title='🎯 Risk-Reward Analysis by Credit Grade',
+            title='Risk-Reward Analysis by Credit Grade',
             height=500,
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)'
@@ -219,7 +219,7 @@ if app_mode == "📊 Executive Overview":
             purpose_summary, 
             path=['purpose'], 
             values='total_loans',
-            title='📊 Portfolio Composition by Purpose',
+            title='Portfolio Composition by Purpose',
             color='net_profit',
             color_continuous_scale='Tealrose',
             height=500
@@ -229,7 +229,7 @@ if app_mode == "📊 Executive Overview":
         st.plotly_chart(fig, use_container_width=True)
 
     # Monthly Performance Trends - FIXED with proper background
-    st.markdown('<h3 class="section-header">📈 Monthly Performance Trends & Market Insights</h3>', unsafe_allow_html=True)
+    st.markdown('<h3 class="section-header"> Monthly Performance Trends & Market Insights</h3>', unsafe_allow_html=True)
     
     # Create a proper line chart for trends with enhanced styling
     fig = go.Figure()
@@ -257,7 +257,7 @@ if app_mode == "📊 Executive Overview":
     
     fig.update_layout(
         title=dict(
-            text='📈 Loan Volume & Interest Rate Trends (Last 6 Months)',
+            text='Loan Volume & Interest Rate Trends (Last 6 Months)',
             x=0.5,
             font=dict(size=20)
         ),
@@ -294,8 +294,8 @@ if app_mode == "📊 Executive Overview":
     st.plotly_chart(fig, use_container_width=True)
 
 # RISK INTELLIGENCE DASHBOARD
-elif app_mode == "🎯 Risk Intelligence":
-    st.markdown('<h2 class="section-header">🔍 Risk Intelligence Center</h2>', unsafe_allow_html=True)
+elif app_mode == "Risk Intelligence":
+    st.markdown('<h2 class="section-header"> Risk Intelligence Center</h2>', unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
     
@@ -307,7 +307,7 @@ elif app_mode == "🎯 Risk Intelligence":
             y='default_rate_percent',
             color='default_rate_percent',
             color_continuous_scale='RdYlGn_r',
-            title='📊 Default Rate by Credit Grade',
+            title='Default Rate by Credit Grade',
             text='default_rate_percent',
             height=400
         )
@@ -323,7 +323,7 @@ elif app_mode == "🎯 Risk Intelligence":
             size='loan_count',
             color='avg_interest',
             color_continuous_scale='RdYlGn_r',
-            title='👥 Default Rate by Employment Length',
+            title=' Default Rate by Employment Length',
             height=400,
             size_max=30
         )
@@ -337,7 +337,7 @@ elif app_mode == "🎯 Risk Intelligence":
             x='grade', 
             y='int_rate',
             color='grade',
-            title='📦 Interest Rate Distribution by Grade',
+            title='Interest Rate Distribution by Grade',
             height=400
         )
         fig.update_layout(showlegend=True, xaxis_title='Credit Grade', yaxis_title='Interest Rate (%)')
@@ -351,7 +351,7 @@ elif app_mode == "🎯 Risk Intelligence":
             size='total_loans',
             color='grade',
             text='grade',
-            title='🎯 Risk vs Return Analysis',
+            title='Risk vs Return Analysis',
             size_max=40,
             height=400
         )
@@ -361,8 +361,8 @@ elif app_mode == "🎯 Risk Intelligence":
         st.plotly_chart(fig, use_container_width=True)
 
 # PERFORMANCE ANALYTICS DASHBOARD
-elif app_mode == "💰 Performance Analytics":
-    st.markdown('<h2 class="section-header">💰 Performance Analytics</h2>', unsafe_allow_html=True)
+elif app_mode == "Performance Analytics":
+    st.markdown('<h2 class="section-header">Performance Analytics</h2>', unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
     
@@ -374,7 +374,7 @@ elif app_mode == "💰 Performance Analytics":
             x='roi_percent',
             y='purpose',
             orientation='h',
-            title='📊 Top 10 ROI Performance',
+            title='Top 10 ROI Performance',
             color='roi_percent',
             color_continuous_scale='Viridis',
             text='roi_percent'
@@ -392,7 +392,7 @@ elif app_mode == "💰 Performance Analytics":
             y='net_profit',
             color='net_profit',
             color_continuous_scale='RdYlGn',
-            title='💵 Net Profit by Loan Purpose',
+            title='Net Profit by Loan Purpose',
             text='net_profit',
             height=500
         )
@@ -401,7 +401,7 @@ elif app_mode == "💰 Performance Analytics":
         st.plotly_chart(fig, use_container_width=True)
     
     # Performance Comparison Table
-    st.markdown('<h3 class="section-header">📋 Performance Summary</h3>', unsafe_allow_html=True)
+    st.markdown('<h3 class="section-header">Performance Summary</h3>', unsafe_allow_html=True)
     
     performance_table = profit_purpose[['purpose', 'total_loans', 'avg_loan_size', 'avg_interest_rate', 'net_profit', 'roi_percent']].copy()
     performance_table = performance_table.round(2)
@@ -418,7 +418,7 @@ elif app_mode == "💰 Performance Analytics":
 
 # PORTFOLIO EXPLORER DASHBOARD - SIMPLIFIED
 else:
-    st.markdown('<h2 class="section-header">🔍 Portfolio Explorer</h2>', unsafe_allow_html=True)
+    st.markdown('<h2 class="section-header"> Portfolio Explorer</h2>', unsafe_allow_html=True)
     
     # Interactive Filters
     col1, col2 = st.columns(2)
@@ -450,7 +450,7 @@ else:
                 filtered_risk,
                 x='grade',
                 y=['default_rate_percent', 'avg_interest_rate'],
-                title='📊 Selected Grades: Risk vs Interest',
+                title='Selected Grades: Risk vs Interest',
                 barmode='group',
                 height=400,
                 color_discrete_map={'default_rate_percent': '#e74c3c', 'avg_interest_rate': '#3498db'}
@@ -471,7 +471,7 @@ else:
                 z='net_profit',
                 color='roi_percent',
                 size='total_loans',
-                title='💰 Selected Purposes: 3D Profitability Analysis',
+                title='Selected Purposes: 3D Profitability Analysis',
                 hover_name='purpose',
                 color_continuous_scale='RdYlGn',
                 height=500
@@ -488,7 +488,7 @@ else:
             st.info("No data available for selected purposes")
     
     # Real-time Portfolio Summary
-    st.markdown('<h3 class="section-header">📈 Filtered Portfolio Summary</h3>', unsafe_allow_html=True)
+    st.markdown('<h3 class="section-header"> Filtered Portfolio Summary</h3>', unsafe_allow_html=True)
     
     if not filtered_risk.empty and not filtered_profit.empty:
         col1, col2, col3, col4 = st.columns(4)
@@ -511,7 +511,7 @@ else:
         
         # Additional insights
         st.markdown("---")
-        st.markdown("### 💡 Filtered Portfolio Insights")
+        st.markdown("### Filtered Portfolio Insights")
         
         best_grade = filtered_risk.loc[filtered_risk['default_rate_percent'].idxmin()]
         best_purpose = filtered_profit.loc[filtered_profit['roi_percent'].idxmax()]
@@ -526,15 +526,15 @@ else:
 
 # Dynamic Insights based on current view
 st.markdown("---")
-st.markdown("### 🎯 Dynamic Insights & Recommendations")
+st.markdown("### Dynamic Insights & Recommendations")
 
 # Create insights based on current dashboard view
-if app_mode == "📊 Executive Overview":
+if app_mode == "Executive Overview":
     insight_col1, insight_col2, insight_col3 = st.columns(3)
     
     with insight_col1:
         st.success("""
-        *🚀 Growth Strategy*
+        *Growth Strategy*
         - Portfolio Value: ${:,.0f}
         - Focus on Grade A-B segments
         - Expand profitable purposes
@@ -542,7 +542,7 @@ if app_mode == "📊 Executive Overview":
     
     with insight_col2:
         st.warning("""
-        *📉 Risk Management*
+        *Risk Management*
         - Current default rate: {:.1f}%
         - Monitor high-risk grades
         - Review underwriting
@@ -550,13 +550,13 @@ if app_mode == "📊 Executive Overview":
     
     with insight_col3:
         st.info("""
-        *💡 Optimization*
+        *Optimization*
         - Net Profit: ${:,.0f}
         - Improve ROI on low performers
         - Diversify portfolio
         """.format(portfolio['net_profit'].iloc[0]))
 
-elif app_mode == "🎯 Risk Intelligence":
+elif app_mode == "Risk Intelligence":
     insight_col1, insight_col2, insight_col3 = st.columns(3)
     
     highest_risk = risk_grade.loc[risk_grade['default_rate_percent'].idxmax()]
@@ -564,7 +564,7 @@ elif app_mode == "🎯 Risk Intelligence":
     
     with insight_col1:
         st.error("""
-        *🚨 Critical Risk*
+        *Critical Risk*
         - {} Grade: {:.1f}% defaults
         - Immediate action required
         - Consider suspending lending
@@ -572,7 +572,7 @@ elif app_mode == "🎯 Risk Intelligence":
     
     with insight_col2:
         st.success("""
-        *✅ Safe Segment*
+        *Safe Segment*
         - {} Grade: {:.1f}% defaults
         - Expand this segment
         - Lower interest rates possible
@@ -580,13 +580,13 @@ elif app_mode == "🎯 Risk Intelligence":
     
     with insight_col3:
         st.warning("""
-        *🔍 Risk Monitoring*
+        *Risk Monitoring*
         - Watch employment segments
         - Track interest rate spreads
         - Implement early warnings
         """)
 
-elif app_mode == "💰 Performance Analytics":
+elif app_mode == "Performance Analytics":
     insight_col1, insight_col2, insight_col3 = st.columns(3)
     
     best_performer = profit_purpose.loc[profit_purpose['net_profit'].idxmax()]
@@ -594,7 +594,7 @@ elif app_mode == "💰 Performance Analytics":
     
     with insight_col1:
         st.success("""
-        *🏆 Top Performer*
+        *Top Performer*
         - {}: ${:,.0f} profit
         - {:.1f}% ROI
         - Expand this segment
@@ -603,14 +603,14 @@ elif app_mode == "💰 Performance Analytics":
     with insight_col2:
         if worst_performer['net_profit'] < 0:
             st.error("""
-            *📉 Loss Maker*
+            *Loss Maker*
             - {}: ${:,.0f} loss
             - Review strategy
             - Consider exiting
             """.format(worst_performer['purpose'], abs(worst_performer['net_profit'])))
         else:
             st.warning("""
-            *⚡ Low Performer*
+            *Low Performer*
             - {}: ${:,.0f} profit
             - Optimize pricing
             - Improve efficiency
@@ -618,7 +618,7 @@ elif app_mode == "💰 Performance Analytics":
     
     with insight_col3:
         st.info("""
-        *💡 Profit Tips*
+        *Profit Tips*
         - Focus on high-ROI purposes
         - Optimize loan sizes
         - Balance risk & return
@@ -629,7 +629,7 @@ else:  # Portfolio Explorer
     
     with insight_col1:
         st.info("""
-        *🔍 Exploration Mode*
+        *Exploration Mode*
         - Use filters to analyze segments
         - Compare different strategies
         - Find hidden opportunities
@@ -637,7 +637,7 @@ else:  # Portfolio Explorer
     
     with insight_col2:
         st.success("""
-        *📊 Custom Analysis*
+        *Custom Analysis*
         - Real-time filtering
         - Multi-dimensional views
         - Data-driven decisions
@@ -645,7 +645,7 @@ else:  # Portfolio Explorer
     
     with insight_col3:
         st.warning("""
-        *🎯 Action Steps*
+        *Action Steps*
         - Apply insights to strategy
         - Test different scenarios
         - Monitor results
@@ -655,6 +655,6 @@ else:  # Portfolio Explorer
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; padding: 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px;">
-    <h4 style="color: white; margin: 0;">🔬 Statistically Validated Insights | p < 0.000001 | 99.999% Confidence</h4>
+    <h4 style="color: white; margin: 0;">Statistically Validated Insights | p < 0.000001 | 99.999% Confidence</h4>
 </div>
 """, unsafe_allow_html=True)

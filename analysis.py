@@ -61,7 +61,7 @@ def get_profitability_by_purpose():
     return profit_data
 
 if __name__ == "__main__":
-    print("📊 Running Analysis...")
+    print("Running Analysis...")
     print(get_portfolio_summary())
     print(get_risk_by_grade())
     print(get_profitability_by_purpose())

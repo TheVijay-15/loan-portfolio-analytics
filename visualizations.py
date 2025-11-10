@@ -10,7 +10,7 @@ plt.rcParams['figure.figsize'] = (12, 6)
 
 conn = sqlite3.connect('loan_analysis.db')
 
-print("📊 Creating Visualizations...")
+print("Creating Visualizations...")
 
 # 1. RISK VS REWARD BY GRADE
 plt.figure(figsize=(12, 6))
@@ -105,4 +105,4 @@ plt.tight_layout()
 plt.show()
 
 conn.close()
-print("✅ Visualizations created successfully!")
+print("Visualizations created successfully!")

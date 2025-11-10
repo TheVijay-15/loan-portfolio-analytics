@@ -1,8 +1,8 @@
-# 🏦 Fintech Loan Portfolio Analytics
+# Fintech Loan Portfolio Analytics
 
 A comprehensive data analytics project analyzing Lending Club loan data to optimize profitability and risk management using SQL, Python, and interactive Streamlit dashboard.
 
-## 🎯 Business Problem Statement
+## Business Problem Statement
 
 **Title:** Optimizing Loan Portfolio Profitability and Risk Management in a Digital Lending Platform
 
@@ -16,7 +16,7 @@ Digital lending platforms serve diverse borrower pools (salaried professionals, 
 - **Optimizing portfolio allocation** to reduce risk and improve margins
 - **Investigating profitability variance** between high-risk and low-risk borrower segments
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### 1. Install Dependencies
 ```bash

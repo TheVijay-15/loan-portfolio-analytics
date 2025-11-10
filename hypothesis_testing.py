@@ -8,7 +8,7 @@ def run_statistical_tests():
     df = pd.read_sql("SELECT * FROM lending_club_loans", conn)
     conn.close()
     
-    print("🔬 STATISTICAL HYPOTHESIS TESTING RESULTS\n")
+    print(" STATISTICAL HYPOTHESIS TESTING RESULTS\n")
     
     # Test 1: Grade A vs Grade C default rates
     grade_a = (df[df['grade'] == 'A']['loan_status'] == 'Charged Off').astype(int)
@@ -40,7 +40,7 @@ def run_statistical_tests():
     print(f"   p-value: {p_corr_display}")
     print(f"   Result: {'SIGNIFICANT CORRELATION' if p_value_corr < 0.05 else 'NO CORRELATION'}")
     
-    print(f"\n📊 SCIENTIFIC INTERPRETATION:")
+    print(f"\n SCIENTIFIC INTERPRETATION:")
     print(f"   • p < 0.05 = Statistically significant")
     print(f"   • p < 0.001 = Highly significant") 
     print(f"   • p < 0.000001 = Overwhelming evidence")

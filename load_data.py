@@ -2,11 +2,11 @@ import pandas as pd
 import sqlite3
 import os
 
-print("🚀 Starting to load Lending Club data...")
+print("load Lending Club data...")
 
 # Load first 2000 rows for better analysis
 df = pd.read_csv("D:/loan_analysis/accepted_2007_to_2018Q4.csv", nrows=2000, low_memory=False)
-print(f"✅ Loaded {len(df):,} loan records!")
+print(f" Loaded {len(df):,} loan records!")
 
 # Select important columns
 columns_we_need = [
@@ -26,5 +26,5 @@ conn = sqlite3.connect('loan_analysis.db')
 df_clean.to_sql('lending_club_loans', conn, if_exists='replace', index=False)
 conn.close()
 
-print("🎉 SUCCESS! Data loaded to SQLite database!")
-print(f"📊 Final dataset: {df_clean.shape}")
+print("Data loaded to SQLite database!")
+print(f" inal dataset: {df_clean.shape}")
