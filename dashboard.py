@@ -455,7 +455,7 @@ elif app_mode == "Risk Intelligence":
         fig.add_vline(x=risk_grade['default_rate_percent'].mean(), line_dash="dash", line_color="blue", annotation_text="Avg Default")
         st.plotly_chart(fig, use_container_width=True)
 
-# PERFORMANCE ANALYTICS DASHBOARD
+# PERFORMANCE ANALYTICS DASHBOARD - FIXED VERSION
 elif app_mode == "Performance Analytics":
     st.markdown('<h2 class="section-header">Performance Analytics</h2>', unsafe_allow_html=True)
     
@@ -495,21 +495,57 @@ elif app_mode == "Performance Analytics":
         fig.update_layout(xaxis_tickangle=-45, xaxis_title='Loan Purpose', yaxis_title='Net Profit ($)')
         st.plotly_chart(fig, use_container_width=True)
     
-    # Performance Comparison Table
+    # Performance Comparison Table - FIXED VERSION
     st.markdown('<h3 class="section-header">Performance Summary</h3>', unsafe_allow_html=True)
     
     performance_table = profit_purpose[['purpose', 'total_loans', 'avg_loan_size', 'avg_interest_rate', 'net_profit', 'roi_percent']].copy()
     performance_table = performance_table.round(2)
     
+    # Format the table without using Styler (which causes the issue)
+    formatted_table = performance_table.copy()
+    formatted_table['avg_loan_size'] = formatted_table['avg_loan_size'].apply(lambda x: f"${x:,.0f}")
+    formatted_table['net_profit'] = formatted_table['net_profit'].apply(lambda x: f"${x:,.0f}")
+    formatted_table['roi_percent'] = formatted_table['roi_percent'].apply(lambda x: f"{x:.1f}%")
+    
+    # Display the formatted table
     st.dataframe(
-        performance_table.style.format({
-            'avg_loan_size': '${:,.0f}',
-            'net_profit': '${:,.0f}',
-            'roi_percent': '{:.1f}%'
-        }).background_gradient(subset=['net_profit', 'roi_percent'], cmap='RdYlGn'),
+        formatted_table,
         use_container_width=True,
         height=400
     )
+    
+    # Alternative: Create a Plotly table for better styling
+    st.markdown('<h4 style="margin-top: 2rem;">Interactive Performance Table</h4>', unsafe_allow_html=True)
+    
+    # Create a Plotly table as an alternative
+    fig = go.Figure(data=[go.Table(
+        header=dict(
+            values=list(performance_table.columns),
+            fill_color='#2c3e50',
+            align='left',
+            font=dict(color='white', size=12)
+        ),
+        cells=dict(
+            values=[performance_table[col] for col in performance_table.columns],
+            fill_color=['white', 'white', 'white', 
+                       ['lightgreen' if x > 0 else 'lightcoral' for x in performance_table['net_profit']],
+                       ['lightgreen' if x > 0 else 'lightcoral' for x in performance_table['roi_percent']]],
+            align='left',
+            format=[None, None, None, 
+                   [',.0f'] if 'net_profit' in performance_table.columns else None,
+                   ['.1f'] if 'roi_percent' in performance_table.columns else None],
+            prefix=[None, None, '$', '$', None],
+            suffix=[None, None, None, None, '%'],
+            font=dict(color=['black'] * len(performance_table.columns))
+        )
+    )])
+    
+    fig.update_layout(
+        height=400,
+        margin=dict(l=0, r=0, t=0, b=0)
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
 
 # PORTFOLIO EXPLORER DASHBOARD
 else:
